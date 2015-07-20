@@ -1,0 +1,725 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>  
+<head>  
+<meta charset="utf-8" />  
+<title>canvas test</title> 
+<script src="{% static 'frontend/js/jquery-latest.js' %}"></script>
+<script type="text/javascript">
+var t = 0;                      //标记当前处理到的位置   
+var size= 1;                   //存储当前尺寸
+var point = [];
+var m = 1;                      //ps
+var u = 0;                           //标记位数
+var wr = 0;                          //标记开端,有括号才计入数据
+var cr = 0;                         //标记是逗号后面的数据
+var num = [0,0,0,0,0];
+var num1 = [0,0,0,0,0];
+var num2 = [0,0,0,0,0];
+var sum_num = 0;                     //运算中的累加值，横坐标
+var sum_num1 = 0;                    //运算中的累加值，纵坐标
+var sum_num2 = 0;
+var select = 0;                      //是否进入拖拽类型，0 代表不是
+var initial_x = 0;                   //初始位置
+var initial_y = 0; 
+var final_x = 0;                     //拖放后的终止位置
+var final_y = 0;                     
+//var datas = [];
+var color = ['#000','#004','#008','#00c','#040','#044','#048','#04c','#080','#084','#088','#08c','#0c0','#0c4','#0c8','#0cc','#400','#404','#408','#40c','#440','#444','#448','#44c','#480','#484','#488','#48c','#4c0','#4c4','#4c8','#4cc','#800','#804','#808','#80c','#8c0','#8c4','#8c8','#8cc','#cc0','#cc4','#cc8','#ccc','#840','#844','#848','#84c','#880','#884','#888','#88c','#c00','#c04','#c08','#c0c','#c40','#c44','#c48','#c4c','#c80','#c84','#c88','#c8c'];
+$(document).ready(function(){
+$.ajax({ type :"get", url :"http://192.168.0.86:8001/site/ccc/",  async :false, success :function(data){
+var datas = data;
+var s = data.length;
+if(datas[2]=="#")
+{
+alert("您没有上传过ps文件，或没有上传合法ps文件，请尝试重新上传");
+}
+else{
+while(t<s)
+{
+    if (datas[t]=="(")
+    {wr = 1;}
+    else if (datas[t]=='?')
+    {   n = 0;
+        u = u-1;
+        while (n<=u)
+            {sum_num+=num[n]*(Math.pow(10,u-n));
+            n = n+1;}
+        point.push(sum_num);
+        //document.write(sum_num);
+        //document.write(',');   
+        sum_num = 0;
+        u = 0;
+        cr = 1;
+    } 
+    else if (datas[t]=='!')
+    {   n = 0;
+        u = u-1;
+        while (n<=u)
+        {   sum_num1+=num1[n]*(Math.pow(10,u-n));
+            n = n+1;}
+        point.push(sum_num1);
+        //document.write(sum_num1);
+        //document.write('@');
+        sum_num1 = 0;
+        u = 0;
+        cr = 2;
+    }
+    else if (datas[t]==')')
+    {   n = 0;
+        u = u-1;
+        while (n<=u)
+        {   sum_num2+=num2[n]*(Math.pow(10,u-n));
+            n = n+1;}
+        point.push(sum_num2);
+       // document.write(sum_num2);
+        //document.write('$<br>');
+        sum_num2 = 0;
+        u = 0 ;
+        wr = 0 ;
+        cr = 0;
+    }
+    else if ((datas[t]>='0') && (datas[t]<='9'))
+    {    if (wr==1)
+         {   if (cr == 0)
+             {   num[u] = Number(datas[t]);
+                 u=u+1;}
+             else if(cr ==1)
+             {   num1[u] = Number(datas[t]);
+                 u=u+1;}
+             else if(cr ==2)
+             {   num2[u] = Number(datas[t]);
+                 u=u+1;}
+             else {}
+         }
+    }
+    else {}
+    t=t+1;
+}//while
+
+}
+}//function
+});   //ajax
+//});
+$("#btn-1").click(function(){
+alert(point.length);
+});
+//$("#btn-3").click(function(){
+
+var res = 0;
+var count = point.length;
+var ps=1;
+while (res<count)
+{
+var canvas = document.getElementById('canvas'); 
+var ctx = canvas.getContext('2d');  // 获取 2D 渲染上下文^M
+//ctx.clearRect(0,0,300,200)  ;// 清除以（0,0）为左上坐标原点，300*200 矩形区域内所有像素^M
+if((point[res+2]==ps)){
+ctx.fillStyle = color[(ps%64)];   // 设置矩形的填充属性，#00f 代表蓝色^M
+ctx.strokeStyle = color[(ps%64)];}  // 设置矩形的线条颜色，#f00 代表红色^M
+else
+{
+ps=ps+1;
+ctx.fillStyle = color[(ps%64)];   // 设置矩形的填充属性，#00f 代表蓝色^M
+ctx.fillStyle = color[(ps%64)];   // 设置矩形的填充属性，#00f 代表蓝色^M
+}
+ctx.fillRect((point[res]*5),(point[res+1]*6),5,6); // 使用 fillStyle 填充一个 150*80 大小的矩形^M
+ctx.strokeRect((point[res]*5),(point[res+1]*6),5,6);  // 以 strokeStype 属性为边的颜色绘制一个无填充矩形^M
+res = res+3;
+//ctx.scale(2,2);
+
+}
+//ctx.scale(2,2);
+//});
+});
+
+function doNothing()
+{
+window.event.returnValue=false;
+return false;}
+
+function init()
+{
+    window.document.onmousedown = mouseDown;
+    window.document.onmouseup = mouseUp;
+}
+
+function mouseDown()
+{  
+    var e = window.event || e;
+    var value = e.button;
+    if(value == 2 || value ==3)
+    {   e.preventDefault();}
+    else
+    {
+      if(select== 0 ){
+      if((e.clientX>0)&&(e.clientY>0)&&(e.clientY<600*size)&&(e.clientX<1250*size))
+      {
+      //var _x=e.clientX-e.target.offsetLeft;
+      //var _y=e.clientY+e.target.offsetTop-2;
+      var scrollX = document.documentElement.scrollLeft || document.body.scrollLeft;
+      var scrollY = document.documentElement.scrollTop || document.body.scrollTop;
+      var _x = e.pageX || e.clientX + scrollX;
+      var _y = e.pageY || e.clientY + scrollY;
+      //var _x=e.clientX;				
+      //var _y=e.clientY;
+      var _t=_x%(5*size);
+      var _m=(_x-_t)/(5*size);
+      var xasis = _m-2;                            //得到x的实际坐标
+      _t = _y%(6*size);
+      _m = (_y-_t)/(6*size);
+      var yasis = _m;                           //得到y的实际坐标
+      var num=0;                                //存储当前点的标号
+      var tol=point.length;
+      var qk=[];                               //存储坐标符合的数组
+      var msg = "It belongs to ";
+      var qt = 0;                                  //标记是否为空
+      var pid1 = 0;
+      while (num<tol)
+      {
+          if(Math.abs(point[num]-xasis)<2)
+          {
+             if(Math.abs(point[num+1]-yasis)<2)
+             {
+                 if(point[num+2]!=pid1){pid1=point[num+2];msg=msg+",ps:"+String(point[num+2]);}
+                 qt = 1; 
+             }
+          }
+          num=num+3;
+      }
+      if (qt == 0){msg=msg+" ,no ps";}
+      msg=String(xasis)+','+String(yasis)+msg;
+      $("p").html(msg);
+      }
+      }
+      else
+      {
+         if((e.clientX>0)&&(e.clientY>0)&&(e.clientY<600*size)&&(e.clientX<1250*size))
+         {
+            var scrollX = document.documentElement.scrollLeft || document.body.scrollLeft;
+      	    var scrollY = document.documentElement.scrollTop || document.body.scrollTop;
+            initial_x = e.pageX || e.clientX + scrollX;
+            initial_y = e.pageY || e.clientY + scrollY;
+         //   alert(String(initial_x)+','+String(initial_y));
+         }    
+      }
+}
+}
+function mouseUp()
+{
+    if (select!=0){
+    var e = window.event || e;
+    var value = e.button;
+    if((e.clientX>0)&&(e.clientY>0)&&(e.clientY<600*size)&&(e.clientX<1250*size))
+    {
+      var scrollX = document.documentElement.scrollLeft || document.body.scrollLeft;
+      var scrollY = document.documentElement.scrollTop || document.body.scrollTop;
+      final_x = e.pageX || e.clientX + scrollX;
+      final_y = e.pageY || e.clientY + scrollY;
+      var _x=initial_x;
+      var _y=initial_y;
+      var _t=_x%(5*size);
+      var _m=(_x-_t)/(5*size);
+      var xasis = _m-2;                            //得到x的实际坐标
+      _t = _y%(6*size);
+      _m = (_y-_t)/(6*size);
+      var yasis = _m;                           //得到y的实际坐标
+      var num=0;                                //存储当前点的标号
+      var tol=point.length;
+      var qk=[];                               //存储坐标符合的数组
+      var qt = 0;                                  //标记是否为空
+      var pid = 0
+      var nid = 0;
+      while (num<tol)
+      {
+          if(Math.abs(point[num]-xasis)<2)
+          {
+             if(Math.abs(point[num+1]-yasis)<2)
+             {
+                 pid = point[num+2];
+                 qt = 1;
+                 nid = num; 
+             }
+          }
+          num=num+3;                               //pid存储当前ps值，好好利用
+      }                                            //nid中存储了在数组中的标号，好好利用
+      if (qt == 0){alert("sorry,but you haven't selected any ps");return;}
+      var _x1 = final_x;
+      var _y1 = final_y;
+      var _t1 = _x1%(5*size);
+      var _m1 = (_x1-_t1)/(5*size);
+      var xasis1 = _m1-2;                            //得到x的实际坐标
+      _t1 = _y1%(6*size);
+      _m1 = (_y1-_t1)/(6*size);
+      var yasis1 = _m1;
+      if(select==1){
+      var width_x = xasis1-xasis;
+      var width_y = yasis1-yasis;
+      var num1=0;                                //存储当前点的标号
+      var tol1=point.length;
+      var new_id;
+      var new_id1;
+      while (num1<tol1)
+      {
+          if(point[num1+2]==pid)
+          {
+             point[num1]=point[num1]+width_x;
+             point[num1+1]=point[num1+1]+width_y;
+          }
+          num1=num1+3;
+      }
+      Tian_chong();
+      }
+      else
+      {
+      new_id=6
+      while(point[nid-new_id*3+2]!=pid)
+      {
+          new_id=new_id-1;
+      }
+      new_id1=6
+      while(point[nid+new_id1*3+2]!=pid)
+      {
+          new_id1=new_id1-1;
+      }
+      var source_x=point[nid-new_id*3];
+      var source_y=point[nid-new_id*3+1];
+      var termin_x=point[nid+new_id1*3];
+      var termin_y=point[nid+new_id1*3+1];
+      var point_tmp = [];
+      var tmp_id = 0;
+      while(tmp_id <nid-new_id*3)
+      {
+         point_tmp.push(point[tmp_id]);
+         point_tmp.push(point[tmp_id+1]);
+         tmp_id = tmp_id+3;
+      }
+      tmp_id = nid-new_id*3+3;
+      while(tmp_id <nid+new_id1*3)
+      {
+         point_tmp.push(point[tmp_id]);
+         point_tmp.push(point[tmp_id+1]);
+         tmp_id = tmp_id+3;
+      } 
+      tmp_id = nid+new_id1*3+3;
+      //alert(tmp_id);
+      var tol2=point.length;
+      //alert(tol2);
+      //alert(point_tmp);
+      while(tmp_id <tol2)
+      {
+         point_tmp.push(point[tmp_id]);
+         point_tmp.push(point[tmp_id+1]);
+         tmp_id = tmp_id+3;
+      }
+      $.ajax({
+        type:"POST",
+        url:"http://192.168.0.86:8001/site/eee/",
+        async :false,
+        data:{num:source_x,num1:source_y,num2:termin_x,num3:termin_y,num4:xasis1,num5:yasis1,num6:point_tmp},
+        dataType:"json",
+        traditional: true,
+        success: function(data) {
+        //alert(point_tmp);
+        var datat=data
+        var tol = datat.length;
+        if (tol<2)
+        {   alert("no compatiable route!");}
+        else{
+        var i = 0;                       //存储标号
+        var qt = 0;                     //存储类型
+        var new_point = [0,0,0,0,0];              //暂存数组
+        var cunshu = [];                 //总体数组
+        var u=0;
+        while (i<tol)
+        {
+         // alert('y');
+          if (datat[i]=='(')
+          { 
+             qt=1;
+             i=i+1;
+          }
+          else if(datat[i]=='?')
+          {  if(qt==1){
+             var tu=0;
+             var sump=0;
+             while(tu<u)
+             {
+                 sump+=new_point[tu]*(Math.pow(10,u-tu-1));
+                 tu=tu+1;
+             }
+             cunshu.push(sump);}
+             //alert(sump);
+             i=i+1;
+             u=0;
+          }
+          else if ((datat[i]>='0')&&(datat[i]<='9'))
+          {   //alert(Number(datat[i]));
+              if(qt==1){new_point[u]=Number(datat[i]);
+              u=u+1;}
+              i=i+1;
+          }
+          else if (datat[i]==')')
+          {  if(qt==1){
+             var tu=0;
+             var sump=0;
+             while(tu<u)
+             {
+                 sump+=new_point[tu]*(Math.pow(10,u-tu-1));
+                 tu=tu+1;
+             }
+             cunshu.push(sump);
+             cunshu.push(pid);
+             qt=0;}
+             i=i+1;
+             u=0;
+          }
+        
+        }
+      var pouint=[];
+      var len1=point.length;
+      var start1=0;
+      while(start1<nid-new_id*3)
+      { pouint.push(point[start1]);pouint.push(point[start1+1]);pouint.push(point[start1+2]);start1=start1+3;}
+      var start=nid-new_id*3;
+      var start2=0;
+      while(start2<cunshu.length)
+      {
+           pouint.push(cunshu[start2]);
+           pouint.push(cunshu[start2+1]);
+           pouint.push(cunshu[start2+2]);
+           //start=start+3;
+           start2=start2+3;
+      }
+     var start3=nid+new_id1*3;
+     while(start3<len1){
+     pouint.push(point[start3]);
+     pouint.push(point[start3+1]);
+     pouint.push(point[start3+2]);
+     start3=start3+3;
+     }
+     point =[];
+     point =pouint;
+     Tian_chong(); 
+     }}
+      });
+      }
+    }
+  }
+}
+function size1()
+{
+    var input = document.getElementById("canvas");
+    input.setAttribute("width", "1250"); 
+    input.setAttribute("height", "600");
+    size = 1;
+Tian_chong();
+    document.getElementById('btn-2').style.color='red';
+    document.getElementById('btn-3').style.color='green';
+    document.getElementById('btn-4').style.color='green';
+}
+function size2()
+{
+    var input = document.getElementById("canvas");
+    input.setAttribute("width", "2500"); 
+    input.setAttribute("height", "1200");
+size = 2;
+    document.getElementById('btn-3').style.color='red';
+    document.getElementById('btn-2').style.color='green';
+    document.getElementById('btn-4').style.color='green';
+Tian_chong();
+}
+function size3()
+{
+    var input = document.getElementById("canvas");
+    input.setAttribute("width", "3750"); 
+    input.setAttribute("height", "1800");
+    size = 3;
+    Tian_chong();
+    document.getElementById('btn-4').style.color='red';
+    document.getElementById('btn-2').style.color='green';
+    document.getElementById('btn-3').style.color='green';
+}
+function Tian_chong()
+{
+var canvas = document.getElementById('canvas'); 
+var ctx = canvas.getContext('2d');  // 获取 2D 渲染上下文^M
+ctx.clearRect(0,0,1250*size,600*size);
+var res = 0;
+var count = point.length;
+//var ps=1;
+while (res<count)
+{
+var canvas = document.getElementById('canvas'); 
+var ctx = canvas.getContext('2d');  // 获取 2D 渲染上下文^M
+var ps = point[res+2];
+ctx.fillStyle = color[(ps%64)];   // 设置矩形的填充属性，#00f 代表蓝色^M
+ctx.strokeStyle = color[(ps%64)];  // 设置矩形的线条颜色，#f00 代表红色^M
+ctx.fillRect((point[res]*5*size),(point[res+1]*6*size),5*size,6*size); // 使用 fillStyle 填充一个 150*80 大小的矩形^M
+ctx.strokeRect((point[res]*5*size),(point[res+1]*6*size),5*size,6*size);  // 以 strokeStype 属性为边的颜色绘制一个无填充矩形^M
+res = res+3;
+//ctx.scale(2,2);
+
+}
+}
+function underselect()
+{
+     if(select==1)
+     { 
+         select = 0;//显示归属ps
+         document.getElementById("btn-5").innerHTML="设计我的ps";
+     }
+     else
+     {  
+         select = 1;//移动整条ps
+          document.getElementById("btn-5").innerHTML="Okay!设计好了，就是它了！";
+     }
+}
+function drag()
+{
+     if(select==1)
+     {
+         alert("请关闭 设计我的ps 开关，防止拖动整个ps");
+     }
+     else if(select==0)
+    {
+         select=2;//拖动局部
+         document.getElementById("btn-7").innerHTML="Okay!";
+    }
+    else
+    {
+         select=0;
+         document.getElementById("btn-7").innerHTML="drag";
+    }
+}
+function upload()
+{
+    $.ajax({
+        type:"POST",
+        url:"http://192.168.0.86:8001/site/ddd/",
+        data:{"num":point},
+        dataType: "json",  
+        //type: "POST",  
+        traditional: true,
+        success: function(data) {
+          alert(data);
+/*
+var datas = data;
+var s = data.length;
+if(datas[2]=="#")
+{
+alert("您没有上传过ps文件，或没有上传合法ps文件，请尝试重新上传");
+}
+else{
+while(t<s)
+{
+    if (datas[t]=="(")
+    {wr = 1;}
+    else if (datas[t]=='?')
+    {   n = 0;
+        u = u-1;
+        while (n<=u)
+            {sum_num+=num[n]*(Math.pow(10,u-n));
+            n = n+1;}
+        point.push(sum_num);
+        //document.write(sum_num);
+        //document.write(',');   
+        sum_num = 0;
+        u = 0;
+        cr = 1;
+    } 
+    else if (datas[t]=='!')
+    {   n = 0;
+        u = u-1;
+        while (n<=u)
+        {   sum_num1+=num1[n]*(Math.pow(10,u-n));
+            n = n+1;}
+        point.push(sum_num1);
+        //document.write(sum_num1);
+        //document.write('@');
+        sum_num1 = 0;
+        u = 0;
+        cr = 2;
+    }
+    else if (datas[t]==')')
+    {   n = 0;
+        u = u-1;
+        while (n<=u)
+        {   sum_num2+=num2[n]*(Math.pow(10,u-n));
+            n = n+1;}
+        point.push(sum_num2);
+       // document.write(sum_num2);
+        //document.write('$<br>');
+        sum_num2 = 0;
+        u = 0 ;
+        wr = 0 ;
+        cr = 0;
+    }
+    else if ((datas[t]>='0') && (datas[t]<='9'))
+    {    if (wr==1)
+         {   if (cr == 0)
+             {   num[u] = Number(datas[t]);
+                 u=u+1;}
+             else if(cr ==1)
+             {   num1[u] = Number(datas[t]);
+                 u=u+1;}
+             else if(cr ==2)
+             {   num2[u] = Number(datas[t]);
+                 u=u+1;}
+             else {}
+         }
+    }
+    else {}
+    t=t+1;
+}//while
+
+}
+}//function*/
+        }
+      });
+}
+function adapt()
+{
+//    alert(point);
+/*var bh = 0;
+var tbh=point.length;
+var data_tmp=[];
+while(bh<tbh)
+{
+    if(point[bh+2]>=24&&point[bh+2]<=26)
+    {
+         data_tmp.push("(");
+         data_tmp.push(point[bh]);
+         data_tmp.push(point[bh+1]);
+         data_tmp.push(point[bh+2]);
+         data_tmp.push(")");
+    }
+    bh =bh+3;
+}
+alert(data_tmp);*/
+    $.ajax({
+        type:"POST",
+        url:"http://192.168.0.86:8001/site/fff/",
+        data:{"num":point},
+        dataType: "json",  
+        //type: "POST",  
+        traditional: true,
+        success: function(data) {
+          alert(data);
+        }
+      });
+}
+function upfile()
+{
+
+/*$.ajax({
+        type:"POST",
+        url:"http://192.168.0.86:8001/site/upload/",
+        data:{"num":point},
+        dataType: "file",  
+        //type: "POST",  
+        traditional: true,
+        success: function(data) {
+          alert(data);
+        }
+      });
+*/
+//$("#formid").submit(); 
+document.getElementById("formid").submit();
+}
+function undo()
+{
+     var str_for_post="hello";
+     $.ajax({
+        type:"POST",
+        url:"http://192.168.0.86:8001/site/ggg/",
+        data:{"num":str_for_post},
+        dataType: "json",  
+        //type: "POST",  
+        traditional: true,
+        success: function(data) {
+//alert(data);
+point =[];
+var ts1=0;
+var datas = data;
+var s1 = data.length;
+var wr1 =0 ;
+if(datas[2]=="#")
+{
+alert("没有可返回的ps!");
+}
+else{
+var numnew = 0;
+while(ts1<s1)
+{ 
+    if (datas[ts1]=="(")
+    {wr1 = 1;}
+    else if (datas[ts1]=='?')
+    {   
+          point.push(numnew);
+          numnew=0;
+          wr1=2;
+    }
+    else if (datas[ts1]=='!')
+    {
+         point.push(numnew);
+        //alert(numnew);
+         numnew=0;
+         wr1=3;
+    }
+    else if(datas[ts1]==')')
+    {  
+         point.push(numnew);
+         numnew=0;
+         wr1=0;
+    }
+    else if ((Number(datas[ts1])>=0) && (Number(datas[ts1])<=500))
+    {    if (wr1!=0)
+         {    //alert(Number(datas[ts1])); 
+              numnew= Number(datas[ts1]);
+         }
+    }
+    else {}
+    ts1=ts1+1;
+}//while
+//alert(point);
+//alert("undone!");
+/*var sizep = size;
+window.location.reload();
+size=sizep;*/
+Tian_chong();
+}
+}//function
+        
+      });
+
+}
+</script>  
+<style type="text/css"></style>  
+</head>  
+<body onload="init()" oncontextmenu="doNothing()">  
+<canvas id="canvas" width="1250" height="600">您的浏览器不支持 canvas 标签</canvas>
+<p id="demo">My First point canvas</p> 
+<button id="btn-1" name="1">当前点个数</button></br>
+<button id="btn-2" name="2" onclick = "size1()">1</button>
+<button id="btn-3" name="3" onclick = "size2()">2</button>
+<button id="btn-4" name="4" onclick = "size3()">3</button>
+<button id="btn-6" name="5" onclick = "upload()">upload</button>
+<button id="btn-7" name="6" onclick = "drag()">drag</button>
+<button id="btn-8" name="7" onclick = "adapt()">adapt</button>
+<!--form enctype="multipart/form-data" method="POST" action="http://192.168.0.86:8001/site/upload/">{% csrf_token %}  }-->
+<form enctype="multipart/form-data" method="POST" action="http://192.168.0.86:8001/site/upload/" id="formid">{% csrf_token %}  
+   <input type="file" name="file" />
+   <br /> 
+   <!--input type="submit" value="上传文件"/--> 
+   <input type="button" value="上传文件" onclick="upfile()"/> 
+</form>
+<form action="http://192.168.0.86:8001/site/ddd/" method="get">{% csrf_token %}
+<button type="submit" name="s_thread" class="btn btn-primary ">download</button>
+<div class="clearfix"></div>
+</form>
+<button id="btn-9" name="8" onclick = "undo()">undo</button>
+<!--改变元素的值-->
+<div id="out"></div>  
+</body>  
+</html> 
