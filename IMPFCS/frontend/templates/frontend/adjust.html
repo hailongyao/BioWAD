@@ -27,7 +27,7 @@ var final_y = 0;
 //var datas = [];
 var color = ['#000','#004','#008','#00c','#040','#044','#048','#04c','#080','#084','#088','#08c','#0c0','#0c4','#0c8','#0cc','#400','#404','#408','#40c','#440','#444','#448','#44c','#480','#484','#488','#48c','#4c0','#4c4','#4c8','#4cc','#800','#804','#808','#80c','#8c0','#8c4','#8c8','#8cc','#cc0','#cc4','#cc8','#ccc','#840','#844','#848','#84c','#880','#884','#888','#88c','#c00','#c04','#c08','#c0c','#c40','#c44','#c48','#c4c','#c80','#c84','#c88','#c8c'];
 $(document).ready(function(){
-$.ajax({ type :"get", url :"http://192.168.0.86:8001/site/ccc/",  async :false, success :function(data){
+$.ajax({ type :"get", url :"http://192.168.0.86:8000/site/ccc/",  async :false, success :function(data){
 var datas = data;
 var s = data.length;
 if(datas[2]=="#")
@@ -314,7 +314,7 @@ function mouseUp()
       }
       $.ajax({
         type:"POST",
-        url:"http://192.168.0.86:8001/site/eee/",
+        url:"http://192.168.0.86:8000/site/eee/",
         async :false,
         data:{num:source_x,num1:source_y,num2:termin_x,num3:termin_y,num4:xasis1,num5:yasis1,num6:point_tmp},
         dataType:"json",
@@ -496,7 +496,7 @@ function upload()
 {
     $.ajax({
         type:"POST",
-        url:"http://192.168.0.86:8001/site/ddd/",
+        url:"http://192.168.0.86:8000/site/ddd/",
         data:{"num":point},
         dataType: "json",  
         //type: "POST",  
@@ -599,7 +599,7 @@ while(bh<tbh)
 alert(data_tmp);*/
     $.ajax({
         type:"POST",
-        url:"http://192.168.0.86:8001/site/fff/",
+        url:"http://192.168.0.86:8000/site/fff/",
         data:{"num":point},
         dataType: "json",  
         //type: "POST",  
@@ -614,7 +614,7 @@ function upfile()
 
 /*$.ajax({
         type:"POST",
-        url:"http://192.168.0.86:8001/site/upload/",
+        url:"http://192.168.0.86:8000/site/upload/",
         data:{"num":point},
         dataType: "file",  
         //type: "POST",  
@@ -632,7 +632,7 @@ function undo()
      var str_for_post="hello";
      $.ajax({
         type:"POST",
-        url:"http://192.168.0.86:8001/site/ggg/",
+        url:"http://192.168.0.86:8000/site/ggg/",
         data:{"num":str_for_post},
         dataType: "json",  
         //type: "POST",  
@@ -707,14 +707,14 @@ Tian_chong();
 <button id="btn-6" name="5" onclick = "upload()">upload</button>
 <button id="btn-7" name="6" onclick = "drag()">drag</button>
 <button id="btn-8" name="7" onclick = "adapt()">adapt</button>
-<!--form enctype="multipart/form-data" method="POST" action="http://192.168.0.86:8001/site/upload/">{% csrf_token %}  }-->
-<form enctype="multipart/form-data" method="POST" action="http://192.168.0.86:8001/site/upload/" id="formid">{% csrf_token %}  
+<!--form enctype="multipart/form-data" method="POST" action="http://192.168.0.86:8000/site/upload/">{% csrf_token %}  }-->
+<form enctype="multipart/form-data" method="POST" action="http://192.168.0.86:8000/site/upload/" id="formid">{% csrf_token %}  
    <input type="file" name="file" />
    <br /> 
    <!--input type="submit" value="上传文件"/--> 
    <input type="button" value="上传文件" onclick="upfile()"/> 
 </form>
-<form action="http://192.168.0.86:8001/site/ddd/" method="get">{% csrf_token %}
+<form action="http://192.168.0.86:8000/site/ddd/" method="get">{% csrf_token %}
 <button type="submit" name="s_thread" class="btn btn-primary ">download</button>
 <div class="clearfix"></div>
 </form>
